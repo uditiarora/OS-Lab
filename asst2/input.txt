@@ -1,0 +1,61 @@
+class process:
+	def __init__(self,pid,priority,at,times):
+		self.pid = pid
+		self.priority = priority
+		self.at = at
+		self.times = times
+		self.io = False
+		self.io_end = 0
+		self.cpu_end = 0
+		self.rs = -1
+		self.wt = 0
+		self.tat = 0
+		self.cpu_time = 0
+		self.io_time = 0
+		for i in range(0,len(times),2):
+			self.cpu_time += times[i]
+		for i in range(1,len(times),2):
+			self.io_time += times[i]
+		self.tot_time = self.cpu_time
+		
+def fcfs(p):
+	p.sort(key = lambda x : x.at)
+	cpu_queue = []
+	io_queue = []
+	cpu = []
+	io = []
+	cpu_end=0
+	io_end = 0
+	for i in range(0,len(p)):
+		cpu_queue.append(i)
+	while(len(cpu_queue)!=0):
+
+			x = cpu_queue.pop(0)
+			
+			cpu = p[x].times.pop(0)
+			cpu_end = max(cpu_end,max(p[x].at,p[x].io_end))
+			if(p[x].rs==-1):
+				p[x].rs = cpu_end - p[x].at
+			cpu_end += cpu
+			io_end = max(cpu_end,io_end)
+			p[x].cpu_end = cpu_end
+			if(len(p[x].times)!=0):
+				#print("hi")
+				io = p[x].times.pop(0)
+				io_end += io
+				p[x].io_end = io_end
+			if(len(p[x].times)==0):
+				p[x].tat = max(cpu_end,p[x].io_end) - p[x].at
+			else:
+				cpu_queue.append(x)
+			#print(x,io_end,cpu_end)
+	for i in range(0,len(p)):
+		p[i].wt = p[i].tat - p[i].rs - p[i].cpu_time
+		print(p[i].pid,p[i].at,p[i].times,p[i].rs,p[i].wt,p[i].tat)
+
+p1 = process(1,3,0,[5,2,5])
+p2 = process(2,1,1,[4,10,3])
+p3 = process(3,2,2,[10,10,2])
+p = [p1,p2,p3]
+fcfs(p)					
+
